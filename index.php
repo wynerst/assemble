@@ -40,12 +40,12 @@ $doc = new DOMDocument();
 $doc->loadXML($contents);
 
 $records = $doc->getElementsByTagName('record');
+
+foreach ($records as $record) {
   $deleted = $record->getElementsByTagName('header');
   if ($deleted[0]->getAttribute('status') == "deleted") {
 	  continue;
   }
-
-foreach ($records as $record) {
   $metadata = $record->getElementsByTagName('metadata')->item(0);
 
   // Access child elements within "metadata" using namespaces
