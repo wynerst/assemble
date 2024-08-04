@@ -40,6 +40,10 @@ $doc = new DOMDocument();
 $doc->loadXML($contents);
 
 $records = $doc->getElementsByTagName('record');
+  $deleted = $record->getElementsByTagName('header');
+  if ($deleted[0]->getAttribute('status') == "deleted") {
+	  continue;
+  }
 
 foreach ($records as $record) {
   $metadata = $record->getElementsByTagName('metadata')->item(0);
