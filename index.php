@@ -1,4 +1,8 @@
 <?php
+/**
+** Harvesting OAI output from OJS - just catch and send the text
+** © Wardiyono, 2024 - wynerst@gmail.com
+**/
 
 function multipleEntry($elementXML) {
 	if (is_null($elementXML->length)) {
