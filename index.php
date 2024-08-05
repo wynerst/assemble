@@ -2,20 +2,21 @@
 
 function multipleEntry($elementXML) {
 	if (is_null($elementXML->length)) {
-		return 0;
+		return "";
 	} else {
 		$count=$elementXML->length;
 		$textContent = ""; $i=1; 
 		foreach ($elementXML as $tc) {
-			$textContent .= $i.". ". $tc->nodeValue ." \n";
+			$textContent .= $tc->nodeValue ."; ";
 			$i++;
 		}
+		$textContent=preg_replace('/[; ]+$/', '', $textContent);
 		return $textContent;
 	}
 }
 
 if (isset($_GET["ojs"])) {
-	$oai = $_GET["ojs"];
+	$oai = rtrim($_GET["ojs"], '/\\');
 	if (isset($_GET["resumptionToken"])) {
 		$nextToken = $_GET["resumptionToken"];
 		// https://ijdc.net/index.php/ijdc/oai?verb=ListRecords&resumptionToken=b021e917d1f9be0991d6216a45d724c0
@@ -52,6 +53,7 @@ foreach ($records as $record) {
   $title = $metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'title')->item(0)->textContent;
   $creator= multipleEntry($metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'creator'));
   $description = $metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'description')->item(0)->textContent;
+  $subject = multipleEntry($metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'subject'));
   $publisher = $metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'publisher')->item(0)->textContent;
   $date = $metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'date')->item(0)->textContent;
   $type = multipleEntry($metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'type'));
@@ -63,17 +65,19 @@ foreach ($records as $record) {
   
   // Process the extracted text content
 
-  echo "Title: $title\n";
-  echo "Creator: $creator";
-  echo "Description: $description\n";
-  echo "publisher: $publisher\n"; 
-  echo "date: $date\n";
-  echo "type: $type";
-  echo "format: $format\n";
-  echo "identifier: $identifier";
-  echo "source: $source"; 
-  echo "language: $language\n"; 
-  echo "relation:   $relation\n\n";
+  //echo "Title: $title\n";
+  echo $title = (empty($title)) ? "" : "Title: $title\n";
+  echo $creator = (empty($creator)) ? "" : "Creator: $creator\n";
+  echo $subject = (empty($subject)) ? "" : "Keyword: $subject\n";
+  echo $description = (empty($description)) ? "" : "Description: $description\n";
+  echo $publisher = (empty($publisher)) ? "" : "Publisher: $publisher\n"; 
+  echo $date = (empty($date)) ? "" : "Date: $date\n";
+  echo $type = (empty($type)) ? "" : "Type: $type\n";
+  echo $format = (empty($format)) ? "" : "Format: $format\n";
+  echo $identifier = (empty($identifier)) ? "" : "Identifier: $identifier\n";
+  echo $source = (empty($source)) ? "" : "Source: $source\n"; 
+  echo $language = (empty($language)) ? "" : "Language: $language\n"; 
+  echo $relation = (empty($relation)) ? "" : "Relation: $relation\n\n";
   
 }
 if ($doc->getElementsByTagName('resumptionToken')->length > 0) {
