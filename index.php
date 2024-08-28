@@ -2,53 +2,44 @@
 /**
 ** Harvesting OAI output from OJS - just catch and send the text
 ** © Wardiyono, 2024 - wynerst@gmail.com
+
 **/
 
-function multipleEntry($elementXML) {
-	if (is_null($elementXML->length)) {
-		return "";
-	} else {
-		$count=$elementXML->length;
-		$textContent = ""; $i=1; 
-		foreach ($elementXML as $tc) {
-			$textContent .= $tc->nodeValue ."; ";
-			$i++;
-		}
-		$textContent=preg_replace('/[; ]+$/', '', $textContent);
-		return $textContent;
-	}
-}
+// key to authenticate
+define('INDEX_AUTH', '1');
+
+require 'dbase.php';
+require 'library.php';
+
 
 if (isset($_GET["ojs"])) {
 	$oai = rtrim($_GET["ojs"], '/\\');
 	if (isset($_GET["resumptionToken"])) {
 		$nextToken = $_GET["resumptionToken"];
-		// https://ijdc.net/index.php/ijdc/oai?verb=ListRecords&resumptionToken=b021e917d1f9be0991d6216a45d724c0
+		// https://domain.ojs/index.php/journal/oai?verb=ListRecords&resumptionToken=b021e917d1f9be0991d6216a45d724c0
 		$url=$oai.'/oai?verb=ListRecords&resumptionToken='.$nextToken;
 	} else {
-		// https://ijdc.net/index.php/ijdc/oai?verb=ListRecords&metadataPrefix=oai_dc
+		// https://domain.ojs/index.php/journal/oai?verb=ListRecords&metadataPrefix=oai_dc
 		$url=$oai.'/oai?verb=ListRecords&metadataPrefix=oai_dc';
 	}
 
-/** Processing XML Element **/
-/**	Example URL
-	$oai = "https://ijdc.net/index.php/ijdc";
-	//$oai = 'https://academicjournal.yarsi.ac.id/index.php/bibliotech';
-	$url = $oai.'/oai?verb=ListRecords&metadataPrefix=oai_dc';
-}
-**/
-echo 'Fetching contents from URL: ' . $url ."\n";
-
+echo '<img src=https://www.openarchives.org/images/OA100.gif height=50px></br>';
+echo '<a href="'.htmlspecialchars($_SERVER["PHP_SELF"]).'">Open new Journal URL</a></br>';
+echo '<h4>Fetching articles from URL: ' . $url ."</h4>";
+$recDel = 0;
+$recAdd = 0;
 $contents = file_get_contents($url);
 
 $doc = new DOMDocument();
 $doc->loadXML($contents);
 
+$tokens=$doc->getElementsByTagName('resumptionToken');	
 $records = $doc->getElementsByTagName('record');
 
 foreach ($records as $record) {
   $deleted = $record->getElementsByTagName('header');
   if ($deleted[0]->getAttribute('status') == "deleted") {
+	  $recDel = $recDel + 1;
 	  continue;
   }
   $metadata = $record->getElementsByTagName('metadata')->item(0);
@@ -67,35 +58,89 @@ foreach ($records as $record) {
   $language = $metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'language')->item(0)->textContent;
   $relation = $metadata->getElementsByTagNameNS('http://purl.org/dc/elements/1.1/', 'relation')->item(0)->textContent;
   
+  $arrdata = [
+      "title"=>$title,
+	  "creator"=>$creator,
+	  "description"=>$description,
+	  "subject"=>$subject,
+	  "publisher"=>$publisher,
+	  "date"=>$date,
+	  "type"=>$type,
+	  "format"=>$format,
+	  "identifier"=>$identifier,
+	  "source"=>$source,
+	  "language"=>$language,
+	  "relation"=>$relation
+	  ];
+
+  if (create($arrdata)) {
+	  $recAdd++;
+  } else {
+      die("Error creating record");
+  }
+
   // Process the extracted text content
 
+  echo "<p>";
   //echo "Title: $title\n";
-  echo $title = (empty($title)) ? "" : "Title: $title\n";
-  echo $creator = (empty($creator)) ? "" : "Creator: $creator\n";
-  echo $subject = (empty($subject)) ? "" : "Keyword: $subject\n";
-  echo $description = (empty($description)) ? "" : "Description: $description\n";
-  echo $publisher = (empty($publisher)) ? "" : "Publisher: $publisher\n"; 
-  echo $date = (empty($date)) ? "" : "Date: $date\n";
-  echo $type = (empty($type)) ? "" : "Type: $type\n";
-  echo $format = (empty($format)) ? "" : "Format: $format\n";
-  echo $identifier = (empty($identifier)) ? "" : "Identifier: $identifier\n";
-  echo $source = (empty($source)) ? "" : "Source: $source\n"; 
-  echo $language = (empty($language)) ? "" : "Language: $language\n"; 
-  echo $relation = (empty($relation)) ? "" : "Relation: $relation\n\n";
-  
+  echo $title = (empty($title)) ? "" : "<b>Title:</b> $title</br>";
+  echo $creator = (empty($creator)) ? "" : "<b>Creator:</b> $creator</br>";
+  echo $subject = (empty($subject)) ? "" : "<b>Keyword:</b> $subject</br>";
+  echo $description = (empty($description)) ? "" : "<b>Description:</b> $description</br>";
+  echo $publisher = (empty($publisher)) ? "" : "<b>Publisher:</b> $publisher</br>"; 
+  echo $date = (empty($date)) ? "" : "<b>Date:</b> $date</br>";
+  echo $type = (empty($type)) ? "" : "<b>Type:</b> $type</br>";
+  echo $format = (empty($format)) ? "" : "<b>Format:</b> $format</br>";
+  echo $identifier = (empty($identifier)) ? "" : "<b>Identifier:</b> $identifier</br>";
+  echo $source = (empty($source)) ? "" : "<b>Source:</b> $source</br>"; 
+  echo $language = (empty($language)) ? "" : "<b>Language:</b> $language</br>"; 
+  echo $relation = (empty($relation)) ? "" : "<a href='$relation' target='blank'><b>Read this article</b></a>";
+  echo "</p>";  
 }
-if ($doc->getElementsByTagName('resumptionToken')->length > 0) {
-	$resume=$doc->getElementsByTagName('resumptionToken')->item(0)->textContent;
-	// 	echo 'Resumption token = <a href="https://ijdc.net/index.php/ijdc/oai?verb=ListRecords&resumptionToken='.$resume.'">Lanjut</a>';
-	echo '<a href="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?ojs='.$oai.'&resumptionToken='.$resume.'">Load more data</a>';
+	echo "<p>";
+	if ($recDel > 0) { echo "There are $recDel record(s) deleted.</br>"; }
+	if ($recAdd > 0) { echo "Added $recAdd record(s) to the index.</br>"; }
+
+if ($tokens->length > 0) {
+	$resume=$tokens->item(0)->textContent;
+	if ($resume <> "") {
+		// 	echo 'Resumption token = <a href="https://ijdc.net/index.php/ijdc/oai?verb=ListRecords&resumptionToken='.$resume.'">Lanjut</a>';
+		echo '<a href="'.htmlspecialchars($_SERVER["PHP_SELF"]).'?ojs='.$oai.'&resumptionToken='.$resume.'">Load more data</a>';
+	}
 }
 
 } else {
 	
-echo '<form method="GET">';
-echo 'OJS URL: <input type="text" name="ojs">&nbsp;&nbsp;';
-echo '<input type="submit">';
-echo '</form>';
+	echo '<img src=https://www.openarchives.org/images/OA100.gif height=50px></br>';
+	echo '<form method="GET">';
+	echo 'Retrieve Open Access Jurnal articles form this OJS URL: <input type="text" name="ojs">&nbsp;&nbsp;';
+	echo '<input type="submit">';
+	echo '</form>';
+
+	$stat = StatData();
+	$i=0;
+
+	echo "<h5>Available data</h5>";
+	if (is_array($stat)) {
+		echo '<table style="font-size:9pt; border: 1px solid black; border-collapse: collapse;">';
+		echo '<th>No.</th><th>Title</th><th>URL</th><th>Article(s)</th>';
+		foreach($stat as $key => $value) {
+			$i= ++$i;
+			echo "<tr><td style='border: 1px solid black;'>$i</td>";
+			foreach ($value as $tag => $content) {
+				if ($tag == "Title") {
+					echo "<td style='border: 1px solid black;'><a href='list.php?&search=$content'>$content</a></td>";
+				} else {
+					echo "<td style='border: 1px solid black;'>$content</td>";
+				}
+			}
+			echo "</tr>";
+		}
+		echo "</table><br/>";
+		echo "<a href='list.php'>Browse harvested data</a>";
+	} else {
+		echo "&nbsp;";
+	}
 }
 
 ?>

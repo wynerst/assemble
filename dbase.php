@@ -36,9 +36,14 @@ function create($data) {
     }
 }
 
-function read() {
+function read($look) {
     global $conn;
-    $result = $conn->query("SELECT * FROM tbl_search");
+	$sql="SELECT * FROM tbl_search";
+	
+	if ($look <> "" OR !(is_null($look))) {
+		$sql= $sql." WHERE description like '%$look%' OR title like '%$look%' OR subject like '%$look%' OR creator like '%$look%' OR source like '%$look%'";
+	}
+    $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         $rows = array();
         while($row = $result->fetch_assoc()) {
@@ -71,4 +76,25 @@ function delete($id) {
         return false;
     }
 }
+
+function StatData() {
+    global $conn;
+	$sql='select substring_index(source,"; ",1) as Title,
+	substring_index(identifier,"/article/",1) as URL,
+	count(id_search) as Articles
+	from tbl_search
+	group by substring_index(source,"; ",1), substring_index(identifier,"/article/",1)';
+	
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        $rows = array();
+        while($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+        return $rows;
+    } else {
+        return false;
+    }
+}
+
 ?>

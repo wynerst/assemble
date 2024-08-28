@@ -2,7 +2,7 @@
 Reading OAI data from Open Journal System
 
 # storing result to database
-1. create dbase using install.php
+1. create/export dbase using install.sql
 2. set your dbase.php file
-3. execute html.php
+3. execute index.php
 

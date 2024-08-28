@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `tbl_search` (
   `relation` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id_search`),
   FULLTEXT KEY `retrieval` (`title`,`creator`,`description`,`subject`,`publisher`,`date`,`source`)
-) ENGINE=InnoDB AUTO_INCREMENT=236 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Store value from OAI records';
+) AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Store value from OAI records';
 
 -- Data exporting was unselected.
 
