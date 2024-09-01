@@ -53,7 +53,7 @@ if (is_array($lst)) {
 					$content = str_ireplace($strTxt, "<fonts style='background-color:Yellow';>$strTxt</fonts>", $content);
 					echo "<td valign='top' bgcolor='grey'>$tag</td><td>$content";
 					if ($tag=="relation") {
-						echo "&nbsp;<a href=".$content.">Open this article</a>";
+						echo "&nbsp;<a href=".$content." target=_blank>Open this article</a>";
 					}
 					echo "</td>";
 					echo "</tr>";
