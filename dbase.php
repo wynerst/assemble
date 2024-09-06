@@ -41,11 +41,21 @@ function read($look) {
 	$sql="SELECT * FROM tbl_search";
 	
 	if ($look <> "" OR !(is_null($look))) {
-		$sql= $sql." WHERE description like '%$look%' OR title like '%$look%' OR subject like '%$look%' OR creator like '%$look%' OR source like '%$look%'";
+//		$sql= $sql." WHERE description like '%$look%' OR title like '%$look%' OR subject like '%$look%' OR creator like '%$look%' OR source like '%$look%'";
+		// Reformat search string for BOOLEAN MODE
+//		$booleanTxt = preg_replace('/[^a-zA-Z0-9\s]/', '', $look);
+//		$booleanTxt = (preg_replace('/[^w]+/', '+', $booleanTxt));
+		$booleanTxt = preg_replace('/[[:punct:]]/', '', $look);
+		$booleanTxt = str_ireplace("  ", " ", $booleanTxt);
+		$booleanTxt = str_ireplace(" ", " +", $booleanTxt);
+		$sql= $sql." WHERE MATCH (title,description,subject) AGAINST ('$booleanTxt' IN BOOLEAN MODE) OR creator like '%$look%' OR source like '%$look%'";
 	}
     $result = $conn->query($sql);
+	$totalRows = $result->num_rows;
     if ($result->num_rows > 0) {
         $rows = array();
+		$rows['sql'] = $sql;
+		$rows['rows'] = $result->num_rows;
         while($row = $result->fetch_assoc()) {
             $rows[] = $row;
         }

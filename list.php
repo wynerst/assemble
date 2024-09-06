@@ -40,12 +40,15 @@ if (isset($_POST["search"]) OR isset($_GET["search"])) {
 $lst=read($strTxt);
 
 if (is_array($lst)) {
-	echo "<table class='table'>";
+//	echo $strTxt.'<br/>';
+//	echo $lst['sql'].'<br/>';
+	echo $lst['rows']." record(s) found for $strTxt.<br/>";
+	echo "<table width=100%>";
 
 		foreach($lst as $key => $value) {
-			if (is_array($value)) {
+			if (is_array($value) AND ($key <> 'sql' OR $key <> 'rows') ) {
 				echo "<tr><td>";
-				echo "<table>";
+				echo "<table width=100%>";
 				$key = $key + 1;
 				echo "<tr><td colspan=2 bgcolor='lite-grey'>".$key."</td></tr>";
 				foreach ($value as $tag => $content) {
