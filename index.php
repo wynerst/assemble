@@ -11,9 +11,9 @@ define('INDEX_AUTH', '1');
 require 'dbase.php';
 require 'library.php';
 
-
 if (isset($_GET["ojs"])) {
-	$oai = rtrim($_GET["ojs"], '/\\');
+	$ojs_save = htmlspecialchars($_GET["ojs"], ENT_QUOTES, 'UTF-8');
+	$oai = rtrim($ojs_safe, '/\\');
 	if (isset($_GET["resumptionToken"])) {
 		$nextToken = $_GET["resumptionToken"];
 		// https://domain.ojs/index.php/journal/oai?verb=ListRecords&resumptionToken=b021e917d1f9be0991d6216a45d724c0
@@ -23,7 +23,8 @@ if (isset($_GET["ojs"])) {
 		$url=$oai.'/oai?verb=ListRecords&metadataPrefix=oai_dc';
 	}
 
-echo '<img src=https://www.openarchives.org/images/OA100.gif height=50px></br>';
+echo '<img src=https://www.openarchives.org/images/OA100.gif height=50px>';
+echo '<div>About</div></br>';
 echo '<a href="'.htmlspecialchars($_SERVER["PHP_SELF"]).'">Open new Journal URL</a></br>';
 echo '<h4>Fetching articles from URL: ' . $url ."</h4>";
 $recDel = 0;

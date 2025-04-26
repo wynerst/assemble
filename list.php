@@ -42,7 +42,8 @@ $lst=read($strTxt);
 if (is_array($lst)) {
 //	echo $strTxt.'<br/>';
 //	echo $lst['sql'].'<br/>';
-	echo $lst['rows']." record(s) found for $strTxt.<br/>";
+	echo $lst['rows']." record(s) found";
+	echo (($strTxt<>"")) ? " for $strTxt.<br/>" : ".<br/>";
 	echo "<table width=100%>";
 
 		foreach($lst as $key => $value) {
