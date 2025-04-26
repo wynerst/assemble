@@ -14,9 +14,9 @@ if (!defined('INDEX_AUTH')) {
 
 // Database connection (replace with your credentials)
 $servername = "localhost";
-$username = "One4All";
-$password = "EveryOne";
-$dbname = "Art_Assemble";
+$username = "root";
+$password = "";
+$dbname = "art_assemble";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
