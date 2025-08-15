@@ -13,7 +13,7 @@ require 'library.php';
 
 if (isset($_GET["ojs"])) {
 	$ojs_save = htmlspecialchars($_GET["ojs"], ENT_QUOTES, 'UTF-8');
-	$oai = rtrim($ojs_safe, '/\\');
+	$oai = rtrim($ojs_save, '/\\');
 	if (isset($_GET["resumptionToken"])) {
 		$nextToken = $_GET["resumptionToken"];
 		// https://domain.ojs/index.php/journal/oai?verb=ListRecords&resumptionToken=b021e917d1f9be0991d6216a45d724c0
@@ -143,5 +143,6 @@ if ($tokens->length > 0) {
 		echo "&nbsp;";
 	}
 }
+
 
 ?>
